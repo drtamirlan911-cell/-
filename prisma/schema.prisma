@@ -1,0 +1,35 @@
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+generator client { provider = "prisma-client-js" }
+enum EventType { VIEW NO_ATTEMPT ANSWER PLACE_SELECT DATETIME_SELECT }
+enum Answer { YES NO_ATTEMPT }
+enum Place { RESTAURANT CINEMA WALK HOME }
+model Invitation {
+  id String @id @default(cuid())
+  token String @unique
+  recipientName String
+  senderName String @default("Тима")
+  buttonLabel String @default("Имя")
+  styleKey String @default("romance_milky_chocolate_roses")
+  includeChildren Boolean @default(true)
+  latestAnswer Answer?
+  latestPlace Place?
+  latestDate String?
+  latestTime String?
+  latestRespondedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  events InvitationEvent[]
+}
+model InvitationEvent {
+  id String @id @default(cuid())
+  invitationId String
+  type EventType
+  answer Answer?
+  place Place?
+  responseDate String?
+  responseTime String?
+  metadata Json?
+  createdAt DateTime @default(now())
+  invitation Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  @@index([invitationId, createdAt])
+}
